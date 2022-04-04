@@ -1,0 +1,4 @@
+*.new
+*.iml
+.idea/
+.vscode/
