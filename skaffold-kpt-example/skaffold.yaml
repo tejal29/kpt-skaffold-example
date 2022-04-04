@@ -1,0 +1,13 @@
+apiVersion: skaffold/v3alpha2
+kind: Config
+build:
+  artifacts:
+  - image: skaffold-example
+manifests:
+  rawYaml:
+    - deployment.yaml
+    - svc.yaml
+deploy:
+  kpt:
+    dir: kpt-hydration
+
