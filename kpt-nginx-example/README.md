@@ -25,16 +25,6 @@ index f6de9b6..c6c4793 100644
  upstream:
    type: git
    git:
-@@ -22,6 +24,6 @@ info:
-   description: This is an example nginx package.
- pipeline:
-   mutators:
--  - image: gcr.io/kpt-fn/set-labels:v0.1
--    configMap:
--      env: dev
-+    - image: gcr.io/kpt-fn/set-labels:v0.1
-+      configMap:
-+        env: dev
 diff --git a/kpt-nginx-example/deployment.yaml b/kpt-nginx-example/deployment.yaml
 index 478a6b7..eb44d1d 100644
 --- a/kpt-nginx-example/deployment.yaml
@@ -62,13 +52,6 @@ index 478a6b7..eb44d1d 100644
          app: nginx
 +        env: dev
      spec:
-       containers:
-         - name: nginx
--          image: "nginx:1.14.2"
-+          image: nginx:1.14.2
-           ports:
-             - protocol: TCP
-               containerPort: 80
 diff --git a/kpt-nginx-example/svc.yaml b/kpt-nginx-example/svc.yaml
 index 25fb693..84c9733 100644
 --- a/kpt-nginx-example/svc.yaml
@@ -77,7 +60,6 @@ index 25fb693..84c9733 100644
  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  # See the License for the specific language governing permissions and
  # limitations under the License.
--
  apiVersion: v1
  kind: Service
  metadata: # kpt-merge: /my-nginx-svc
