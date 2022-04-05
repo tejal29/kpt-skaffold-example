@@ -44,7 +44,7 @@ Cleaning up...
 3) If you run `git status`, you will see the `deployment.yaml` 
 and `svc.yaml` are unchanged. A new `.kpt-pipeline` directory exists.
 
-Note: This temporary directory gets cleaned up at the end of the run.
+Note: This temporary directory should cleaned up at the end of the run. <TODO: tejal29@ to open a skaffold issues>
 
 ```shell
 git status
