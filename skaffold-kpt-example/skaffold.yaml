@@ -7,7 +7,11 @@ manifests:
   rawYaml:
     - deployment.yaml
     - svc.yaml
+  transform:
+  - name: set-labels
+    configMap:
+     - "env: dev"
 deploy:
-  kpt:
-    dir: kpt-hydration
+  kpt: {}
+
 
