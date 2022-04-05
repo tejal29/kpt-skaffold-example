@@ -4,139 +4,113 @@ This example explains out of place hydration when rendering and applying resourc
 to your cluster using kpt v1 deployer on skaffold v2 branch.
 
 This example is skaffold-ified example of [kpt-nginx-example](../kpt-nginx-example). 
-Since skaffold needs to build, I have added a go helloworld example in the built artifact. 
-The `KptFile` is same in both [kpt-nginx-example](../kpt-nginx-example/Kptfile) and
-[skaffold-kpt-example](../skaffold-kpt-example/kpt-hydration/Kptfile)
+Since skaffold needs to build, I have added a go helloworld example in the built artifact.
+The `KptFile` in [kpt-nginx-example](../kpt-nginx-example/Kptfile) has transform [configuration](../kpt-nginx-example/Kptfile#L24)
+which is same as `transform` config in [skaffold.yaml](./skaffold.yaml#L10)
 
-1) To install skaffold V2, please reach out to tejaldesai@
-2) Run
+
+1) To install skaffold V2 (mac only), please reach out to tejal29@
+2) Run `skaffold dev`
 ```shell
+skaffold-kpt-example git:(main) skaffold dev -d gcr.io/tejal-gke1
+Listing files to watch...
+ - skaffold-example
+Generating tags...
+ - skaffold-example -> gcr.io/tejal-gke1/skaffold-example:00200b9
+Checking cache...
+ - skaffold-example: Found Remotely
+Starting render...
+Package ".kpt-pipeline": 
+[RUNNING] "gcr.io/kpt-fn/set-labels:v0.1"
+[PASS] "gcr.io/kpt-fn/set-labels:v0.1" in 1.5s
 
-```
-3) Run `git diff` and you will kpt applied the mutations mentioned in the pipeline
-directly to the k8 resource yaml
-
-```shell
-diff --git a/kpt-nginx-example/Kptfile b/kpt-nginx-example/Kptfile
-index f6de9b6..c6c4793 100644
---- a/kpt-nginx-example/Kptfile
-+++ b/kpt-nginx-example/Kptfile
-@@ -2,6 +2,8 @@ apiVersion: kpt.dev/v1
- kind: Kptfile
- metadata:
-   name: nginx
-+  labels:
-+    env: dev
- upstream:
-   type: git
-   git:
-@@ -22,6 +24,6 @@ info:
-   description: This is an example nginx package.
- pipeline:
-   mutators:
--  - image: gcr.io/kpt-fn/set-labels:v0.1
--    configMap:
--      env: dev
-+    - image: gcr.io/kpt-fn/set-labels:v0.1
-+      configMap:
-+        env: dev
-diff --git a/kpt-nginx-example/deployment.yaml b/kpt-nginx-example/deployment.yaml
-index 478a6b7..eb44d1d 100644
---- a/kpt-nginx-example/deployment.yaml
-+++ b/kpt-nginx-example/deployment.yaml
-@@ -11,24 +11,27 @@
- # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- # See the License for the specific language governing permissions and
- # limitations under the License.
--
- apiVersion: apps/v1
- kind: Deployment
- metadata: # kpt-merge: /my-nginx
-   name: my-nginx
-+  labels:
-+    env: dev
- spec:
-   replicas: 4
-   selector:
-     matchLabels:
-       app: nginx
-+      env: dev
-   template:
-     metadata:
-       labels:
-         app: nginx
-+        env: dev
-     spec:
-       containers:
-         - name: nginx
--          image: "nginx:1.14.2"
-+          image: nginx:1.14.2
-           ports:
-             - protocol: TCP
-               containerPort: 80
-diff --git a/kpt-nginx-example/svc.yaml b/kpt-nginx-example/svc.yaml
-index 25fb693..84c9733 100644
---- a/kpt-nginx-example/svc.yaml
-+++ b/kpt-nginx-example/svc.yaml
-@@ -11,17 +11,18 @@
- # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- # See the License for the specific language governing permissions and
- # limitations under the License.
--
- apiVersion: v1
- kind: Service
- metadata: # kpt-merge: /my-nginx-svc
-   name: my-nginx-svc
-   labels:
-     app: nginx
-+    env: dev
- spec:
-   type: LoadBalancer
-   selector:
-     app: nginx
-+    env: dev
-   ports:
-     - protocol: TCP
-       port: 80
-```
-
-4) Now lets, try to apply this resources on our cluster.
-
-Before, applying lets first commit these changes. 
-
-```shell
-git add . 
-git commit -am "render commit"
-
-```
-
-Now, initialize apply
-
-```shell
-kpt live init  
+Successfully executed 1 function(s) in 1 package(s).
+Tags used in deployment:
+ - skaffold-example -> gcr.io/tejal-gke1/skaffold-example:00200b9@sha256:4830d819b6f1ced78b64816608c3f1d9c5f1a0cceac51a8f6a2189fc97815f41
+Starting deploy...
 initializing Kptfile inventory info (namespace: default)...success
+service/my-nginx-svc apply failed: can't apply the resource since its annotation config.k8s.io/owning-inventory is a different inventory object
+deployment.apps/skaffold-example apply failed: error when creating "manifests.yaml": Deployment.apps "skaffold-example" is invalid: [metadata.labels: Invalid value: " dev": a valid label must be an empty string or consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character (e.g. 'MyValue',  or 'my_value',  or '12345', regex used for validation is '(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?'), spec.selector.matchLabels: Invalid value: " dev": a valid label must be an empty string or consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character (e.g. 'MyValue',  or 'my_value',  or '12345', regex used for validation is '(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?'), spec.selector: Invalid value: v1.LabelSelector{MatchLabels:map[string]string{"app":"nginx", "env":" dev"}, MatchExpressions:[]v1.LabelSelectorRequirement(nil)}: invalid label selector]
+2 resource(s) applied. 0 created, 0 unchanged, 0 configured, 2 failed
+E0404 20:09:17.859125   63733 task.go:248] Empty object UID from InventoryManager: default_my-nginx-svc__Service
+E0404 20:09:17.864779   63733 task.go:248] Empty object UID from InventoryManager: default_skaffold-example_apps_Deployment
+service/my-nginx-svc reconcile skipped
+deployment.apps/skaffold-example reconcile skipped
+0 resource(s) reconciled, 2 skipped, 0 failed to reconcile, 0 timed out
+2 resources failed 
+Cleaning up...
 ```
 
-Lets finally apply, 
+3) If you run `git status`, you will see the `deployment.yaml` 
+and `svc.yaml` are unchanged. A new `.kpt-pipeline` directory exists.
+
+Note: This temporary directory gets cleaned up at the end of the run.
 
 ```shell
-kpt live apply
+git status
+On branch main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.kpt-pipeline/
+  nothing added to commit but untracked files present (use "git add" to track)	
 ```
 
-If you see, kpt v1 made in place changes to the `Kptfile`
+You can take a look at the manifests.yaml in the `.kpt-pipeline`
 
 ```shell
-diff --git a/kpt-nginx-example/Kptfile b/kpt-nginx-example/Kptfile
-index c6c4793..c43020a 100644
---- a/kpt-nginx-example/Kptfile
-+++ b/kpt-nginx-example/Kptfile
-@@ -27,3 +27,7 @@ pipeline:
-     - image: gcr.io/kpt-fn/set-labels:v0.1
-       configMap:
-         env: dev
-+inventory:
-+  namespace: default
-+  name: inventory-31552507
-+  inventoryID: b7cf54f2c3b853091772048dd0e7e9d84c6cf5a0-1649100082385222000
-(END)
+skaffold-kpt-example git:(main) ✗ ls .kpt-pipeline 
+Kptfile        manifests.yaml
+```
+<details>
+  <summary> Manifests.yaml contains the hydrated manifests with label `env: dev`</summary>
+
+```shell 
+skaffold-kpt-example git:(main) ✗ cat .kpt-pipeline/manifests.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    skaffold.dev/run-id: 6ceeed78-8a8e-42f1-be2b-8ddb74416fcb
+    env: ' dev'
+  name: skaffold-example
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx
+      env: ' dev'
+  template:
+    metadata:
+      labels:
+        app: nginx
+        skaffold.dev/run-id: 6ceeed78-8a8e-42f1-be2b-8ddb74416fcb
+        env: ' dev'
+    spec:
+      containers:
+      - image: gcr.io/tejal-gke1/skaffold-example:00200b9@sha256:4830d819b6f1ced78b64816608c3f1d9c5f1a0cceac51a8f6a2189fc97815f41
+        name: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+    skaffold.dev/run-id: 6ceeed78-8a8e-42f1-be2b-8ddb74416fcb
+    env: ' dev'
+  name: my-nginx-svc
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    app: nginx
+    env: ' dev'
+  type: LoadBalancer
+➜  skaffold-kpt-example git:(main) ✗ 
 ```
