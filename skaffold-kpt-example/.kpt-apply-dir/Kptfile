@@ -1,6 +1,10 @@
 apiVersion: kpt.dev/v1
 kind: Kptfile
 metadata:
-  name: .kpt-apply-dir
+    name: .kpt-apply-dir
 info:
-  description: sample description
+    description: sample description
+inventory:
+    namespace: default
+    name: inventory-57874970
+    inventoryID: 7be0c4c9b79cc1961a87a6ed4ec03481d452f2f1-1658512180400574000

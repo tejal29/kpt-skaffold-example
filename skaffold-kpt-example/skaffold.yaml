@@ -14,9 +14,12 @@ manifests:
 deploy:
   kpt:
     dir: .kpt-apply-dir
-    namespace: test
-    defaultNamespace: "test"
+    namespace: default
     applyFlags:
     - " --output=json"
+    - "--inventory-policy=adopt"
+    flags:
+    - "--log_dir=."
+    - "--log_file=kpt.log"
 
 
