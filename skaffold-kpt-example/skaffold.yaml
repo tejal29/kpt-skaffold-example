@@ -12,6 +12,11 @@ manifests:
     configMap:
      - "env:dev"
 deploy:
-  kpt: {}
+  kpt:
+    dir: .kpt-apply-dir
+    namespace: test
+    defaultNamespace: "test"
+    applyFlags:
+    - " --output=json"
 
 
