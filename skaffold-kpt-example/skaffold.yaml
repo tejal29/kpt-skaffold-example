@@ -1,4 +1,4 @@
-apiVersion: skaffold/v3alpha2
+apiVersion: skaffold/v3alpha1
 kind: Config
 build:
   artifacts:
@@ -10,7 +10,7 @@ manifests:
   transform:
   - name: set-labels
     configMap:
-     - "env: dev"
+     - "env:dev"
 deploy:
   kpt: {}
 
