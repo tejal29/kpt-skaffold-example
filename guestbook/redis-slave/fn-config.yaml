@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: resize
+data:
+  by-path: spec.replicas
+  by-value: "2"
+  put-value: "5"

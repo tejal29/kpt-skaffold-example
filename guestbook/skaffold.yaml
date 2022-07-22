@@ -1,0 +1,47 @@
+apiVersion: skaffold/v3alpha1
+kind: Config
+metadata: 
+  name: guestbook
+
+build:
+  artifacts:
+    - image: redis-slave
+      context: redis-slave/
+    - image: php-redis
+      context: php-redis
+    - image: skaffold-helm
+      context: helm
+    
+  tagPolicy:
+    sha256: {}
+  local: 
+    push: true 
+manifests:
+  kustomize:
+    paths:
+    - php-redis/config/*.yaml
+  rawYaml:
+    - redis-master/*.yaml
+  kpt:
+    - redis-slave/
+  helm:
+    releases:
+    - name: skaffold-helm
+      chartPath: helm/charts
+  transform:
+    - name: set-annotations
+      configMap:
+        - "author:yuwenma-5"
+    - name: create-setters
+      configMap:
+        - "app:guestbook"
+    - name: apply-setters
+      configMap:
+        - "app:guestbook-yuwen"
+  validate:
+    - name: kubeval
+deploy:
+  kpt:
+    # namespace: default
+    # name: inventory-90195255
+    # inventoryID: 3cec9ce7-d9eb-4503-b44c-ffa6ca3a0d49
